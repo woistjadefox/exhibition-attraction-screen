@@ -97,7 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0d88179b2b05834ab17507b4c68b17f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idleTime: 180
+  idleTimeLimit: 180
   useUnscaledTime: 1
   freezeTimeDuringScreen: 0
   startVideoAfterSceneLoad: 0
@@ -111,7 +111,7 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6472271759127941730}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: 90daafe173d0d4e42b973b5bda35f3e7, type: 3}
+  m_VideoClip: {fileID: 32900000, guid: 06cd380d80d704248a27a666ba643ce5, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 0}
