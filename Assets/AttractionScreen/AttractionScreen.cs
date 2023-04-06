@@ -21,6 +21,8 @@ namespace Zhdk.Gamelab
         [SerializeField] private bool freezeTimeDuringScreen = false;
         [Tooltip("Start the video once the scenes got loaded")]
         [SerializeField] private bool startVideoAfterSceneLoad;
+        [Tooltip("Set the video's time to be in sync with the system time. Useful for having multiple devices running the attraction screen in sync.\nNote: Only works if every device's video has the same length")]
+        [SerializeField] private bool syncVideoToSystemTime = true;
         [Tooltip("The scene / scenes you want to load once we start the attraction screen")]
         [SerializeField] private List<string> restartScenes = new List<string>();
 
@@ -105,6 +107,13 @@ namespace Zhdk.Gamelab
 
             if(startVideoAfterSceneLoad == false)
             {
+                if (syncVideoToSystemTime)
+                {
+                    double systemTime = System.DateTime.Now.TimeOfDay.TotalSeconds;
+                    float videoLength = videoPlayer.frameCount / videoPlayer.frameRate;
+                    videoPlayer.time = systemTime % videoLength;
+                }
+
                 videoPlayer.Play();
                 canvas.enabled = true;
             }
@@ -118,6 +127,13 @@ namespace Zhdk.Gamelab
 
             if (startVideoAfterSceneLoad)
             {
+                if (syncVideoToSystemTime)
+                {
+                    double systemTime = System.DateTime.Now.TimeOfDay.TotalSeconds;
+                    float videoLength = videoPlayer.frameCount / videoPlayer.frameRate;
+                    videoPlayer.time = systemTime % videoLength;
+                }
+
                 videoPlayer.Play();
                 canvas.enabled = true;
             }
