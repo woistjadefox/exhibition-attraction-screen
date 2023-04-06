@@ -105,37 +105,49 @@ namespace Zhdk.Gamelab
                 Time.timeScale = 0;
             }
 
-            if(startVideoAfterSceneLoad == false)
-            {
-                if (syncVideoToSystemTime)
+            if (startVideoAfterSceneLoad) {
+                // load scenes
+                for(int i = 0; i < restartScenes.Count; i++)
                 {
-                    double systemTime = System.DateTime.Now.TimeOfDay.TotalSeconds;
-                    float videoLength = videoPlayer.frameCount / videoPlayer.frameRate;
-                    videoPlayer.time = systemTime % videoLength;
+                    // load first scene and make it the active one
+                    SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single: LoadSceneMode.Additive);
                 }
-
-                videoPlayer.Play();
-                canvas.enabled = true;
             }
 
-            // load scenes
-            for(int i = 0; i < restartScenes.Count; i++)
+            if (syncVideoToSystemTime)
             {
-                // load first scene and make it the active one
-                SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single: LoadSceneMode.Additive);
+                double systemTime = System.DateTime.Now.TimeOfDay.TotalSeconds;
+                float videoLength = videoPlayer.frameCount / videoPlayer.frameRate;
+                videoPlayer.time = systemTime % videoLength;
             }
 
-            if (startVideoAfterSceneLoad)
-            {
-                if (syncVideoToSystemTime)
-                {
-                    double systemTime = System.DateTime.Now.TimeOfDay.TotalSeconds;
-                    float videoLength = videoPlayer.frameCount / videoPlayer.frameRate;
-                    videoPlayer.time = systemTime % videoLength;
-                }
+            // To prevent incorrect frames when starting video
+            videoPlayer.Prepare();
 
-                videoPlayer.Play();
-                canvas.enabled = true;
+            // Wait for video to be ready to play
+            while (videoPlayer.isPrepared == false) {
+                yield return null;
+            }
+
+            videoPlayer.Play();
+
+            // Wait some more...
+            for(int i = 0; i < 10; i ++)
+            {
+                yield return null;
+            }
+
+            // Finally show the video
+            canvas.enabled = true;
+
+            if (startVideoAfterSceneLoad == false)
+            {
+                // load scenes
+                for(int i = 0; i < restartScenes.Count; i++)
+                {
+                    // load first scene and make it the active one
+                    SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single: LoadSceneMode.Additive);
+                }
             }
 
             while (GetAnyInput() == false)
