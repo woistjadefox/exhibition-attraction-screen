@@ -21,6 +21,8 @@ namespace Zhdk.Gamelab
         [SerializeField] private bool freezeTimeDuringScreen = false;
         [Tooltip("Start the video once the scenes got loaded")]
         [SerializeField] private bool startVideoAfterSceneLoad;
+        [Tooltip("Set the video's time to be in sync with the system time. Useful for having multiple devices running the attraction screen in sync.\nNote: Only works if every device's video has the same length")]
+        [SerializeField] private bool syncVideoToSystemTime = true;
         [Tooltip("The scene / scenes you want to load once we start the attraction screen")]
         [SerializeField] private List<string> restartScenes = new List<string>();
 
@@ -103,23 +105,49 @@ namespace Zhdk.Gamelab
                 Time.timeScale = 0;
             }
 
-            if(startVideoAfterSceneLoad == false)
-            {
-                videoPlayer.Play();
-                canvas.enabled = true;
+            if (startVideoAfterSceneLoad) {
+                // load scenes
+                for(int i = 0; i < restartScenes.Count; i++)
+                {
+                    // load first scene and make it the active one
+                    SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single: LoadSceneMode.Additive);
+                }
             }
 
-            // load scenes
-            for(int i = 0; i < restartScenes.Count; i++)
+            if (syncVideoToSystemTime)
             {
-                // load first scene and make it the active one
-                SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single: LoadSceneMode.Additive);
+                double systemTime = System.DateTime.Now.TimeOfDay.TotalSeconds;
+                float videoLength = videoPlayer.frameCount / videoPlayer.frameRate;
+                videoPlayer.time = systemTime % videoLength;
             }
 
-            if (startVideoAfterSceneLoad)
+            // To prevent incorrect frames when starting video
+            videoPlayer.Prepare();
+
+            // Wait for video to be ready to play
+            while (videoPlayer.isPrepared == false) {
+                yield return null;
+            }
+
+            videoPlayer.Play();
+
+            // Wait some more...
+            for(int i = 0; i < 10; i ++)
             {
-                videoPlayer.Play();
-                canvas.enabled = true;
+                yield return null;
+            }
+
+            // Finally show the video
+            canvas.enabled = true;
+
+            if (startVideoAfterSceneLoad == false)
+            {
+                // load scenes
+                for(int i = 0; i < restartScenes.Count; i++)
+                {
+                    // load first scene and make it the active one
+                    SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single: LoadSceneMode.Additive);
+                }
             }
 
             while (GetAnyInput() == false)
