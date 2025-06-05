@@ -14,7 +14,7 @@ namespace Zhdk.Gamelab
         public float IdleTimeLimit => idleTimeLimit;
 
         [Tooltip("The time the game can idle before starting the attraction screen")]
-        [SerializeField] private float idleTimeLimit = 180;
+        [SerializeField] private float idleTimeLimit = 60;
         [Tooltip("If this option is enabled the idle time goes up even if Time.timeScale is on 0")]
         [SerializeField] private bool useUnscaledTime = true;
         [Tooltip("Game-play time will be frozen during the attraction screen")]
