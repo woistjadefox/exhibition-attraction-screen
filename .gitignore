@@ -14,12 +14,14 @@ ExportedObj/
 obj/
 lfs/
 hooks/
+.vscode/
 *.svd
 *.userprefs
 *.csproj
 *.pidb
 *.suo
 *.sln
+*.slnx
 *.user
 *.unityproj
 *.booproj

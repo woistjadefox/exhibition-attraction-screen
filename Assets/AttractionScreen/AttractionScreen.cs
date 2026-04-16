@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
+using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -31,12 +32,38 @@ namespace Zhdk.Gamelab
         private Coroutine attractionScreenRoutine;
 
         /// <summary>
-        /// If you use any other input tool you  might change this function with the input detection methods of your tool / game. 
+        /// If you use any other input tool you might change this function with the input detection methods of your tool/game. 
         /// </summary>
         /// <returns>If there is any input taken that will influence the attraction screen</returns>
         private bool GetAnyInput()
         {
-            return Input.anyKey || Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0;
+            var keyboard = Keyboard.current;
+            var mouse = Mouse.current;
+            var gamepad = Gamepad.current;
+
+            if (keyboard != null && keyboard.anyKey.isPressed)
+            {
+                return true;
+            }
+
+            if (mouse != null && (mouse.delta.ReadValue() != Vector2.zero ||
+                mouse.leftButton.isPressed || mouse.rightButton.isPressed || mouse.middleButton.isPressed))
+            {
+                return true;
+            }
+
+            if (gamepad != null)
+            {
+                foreach (var control in gamepad.allControls)
+                {
+                    if (control is UnityEngine.InputSystem.Controls.ButtonControl button && button.isPressed)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private void Awake()
@@ -50,7 +77,7 @@ namespace Zhdk.Gamelab
             instance = this;
             DontDestroyOnLoad(gameObject);
 
-            if(TryGetComponent(out videoPlayer) == false)
+            if (TryGetComponent(out videoPlayer) == false)
             {
                 Debug.LogError("Please attach a video player component to this GameObject!");
             }
@@ -69,10 +96,10 @@ namespace Zhdk.Gamelab
             }
 
             bool anyInput = GetAnyInput();
-            
-            if(anyInput == false && idleTime > idleTimeLimit)
+
+            if (anyInput == false && idleTime > idleTimeLimit)
             {
-                if(attractionScreenRoutine != null)
+                if (attractionScreenRoutine != null)
                 {
                     StopCoroutine(attractionScreenRoutine);
                 }
@@ -82,7 +109,7 @@ namespace Zhdk.Gamelab
             }
             else
             {
-                if(anyInput)
+                if (anyInput)
                 {
                     idleTime = 0;
                 }
@@ -98,22 +125,22 @@ namespace Zhdk.Gamelab
             attractionScreenIsOn = true;
 
             var timeBeforeFreezing = Time.timeScale;
-            if(freezeTimeDuringScreen)
+            if (freezeTimeDuringScreen)
             {
                 Time.timeScale = 0;
             }
 
-            if(startVideoAfterSceneLoad == false)
+            if (startVideoAfterSceneLoad == false)
             {
                 videoPlayer.Play();
                 canvas.enabled = true;
             }
 
             // load scenes
-            for(int i = 0; i < restartScenes.Count; i++)
+            for (int i = 0; i < restartScenes.Count; i++)
             {
                 // load first scene and make it the active one
-                SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single: LoadSceneMode.Additive);
+                SceneManager.LoadScene(restartScenes[i], i == 0 ? LoadSceneMode.Single : LoadSceneMode.Additive);
             }
 
             if (startVideoAfterSceneLoad)
@@ -131,8 +158,8 @@ namespace Zhdk.Gamelab
             videoPlayer.Stop();
             attractionScreenIsOn = false;
             attractionScreenRoutine = null;
-            
-            if(freezeTimeDuringScreen)
+
+            if (freezeTimeDuringScreen)
             {
                 Time.timeScale = timeBeforeFreezing;
             }
